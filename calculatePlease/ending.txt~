@@ -1,0 +1,77 @@
+   var geocoder;
+   function initialize() {
+      geocoder = new google.maps.Geocoder();
+      var mapOptions = {
+         center: new google.maps.LatLng(-34.397, 150.644),
+         zoom: 3
+      };
+      var map = new google.maps.Map(document.getElementById("map-canvas"), mapOptions);
+      var ImageTRUE = new google.maps.MarkerImage(
+         "Marker1.png",
+         null,
+         null,
+         null,
+         new google.maps.Size(32, 32)
+      ); 
+      var ImageFALSE = new google.maps.MarkerImage(
+         "Marker0.png",
+         null,
+         null,
+         null,
+         new google.maps.Size(32, 32)
+      );
+      var Num = 0;
+      var averageLat = 0;
+      var averageLng = 0;
+      var marker;
+      var infowindow;
+      var beginning = '<div id="content"><div id="siteNotice"></div><div id="bodyContent"><p>';
+      var ending = '</p></div></div>';
+      for(var i = 0; i < n; i++){
+         geocoder.geocode({'address': address[i], language: 'ru'},
+         function(i,averageLat,averageLng,Num){
+            return function(results, status) {
+               if (status == google.maps.GeocoderStatus.OK) {
+                  averageLat = averageLat + results[0].geometry.location.lat();
+                  averageLng = averageLng + results[0].geometry.location.lng();
+                  Num = Num + 1;
+                  if (message[i]){
+                     marker = new google.maps.Marker({
+                        map: map,
+                        position: results[0].geometry.location,
+                        title: "Massage has been sent",
+                        icon: ImageTRUE
+                     });
+                  } else {
+                     marker = new google.maps.Marker({
+                        map: map,
+                        position: results[0].geometry.location,
+                        title: "Massage has not been sent",
+                        icon: ImageFALSE
+                     });
+                  }
+                  var contentString = beginning + address[i] + ending;
+                  infowindow = new google.maps.InfoWindow();
+                  google.maps.event.addListener(marker, 'click',
+                  (function(marker) {
+                     return function() {
+                        infowindow.setContent(contentString);
+                        infowindow.open(map,marker);
+                     }
+                  })(marker));
+                  var myLatlng = new google.maps.LatLng(averageLat/Num, averageLng/Num);
+                  map.setCenter(myLatlng);
+               } else {
+                  alert("Geocode was not successful for the following reason: " + status);
+               }
+            }
+         }(i,averageLat,averageLng,Num));
+      }
+   }
+   google.maps.event.addDomListener(window, 'load', initialize);
+    </script>
+  </head>
+  <body>
+    <div id="map-canvas"/>
+  </body>
+</html>
